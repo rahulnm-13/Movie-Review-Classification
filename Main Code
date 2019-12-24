@@ -1,0 +1,86 @@
+import sys
+import numpy as np
+import pandas as pd
+from nltk.corpus import stopwords
+from nltk.tokenize import RegexpTokenizer
+from nltk.stem.porter import PorterStemmer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB,BernoulliNB,GaussianNB
+
+tokenizer = RegexpTokenizer(r'\w+')                                        # regular expression tokenizer extracting all the words
+
+en_stopwords = set(stopwords.words('english'))
+
+ps = PorterStemmer()
+
+def getCleanReview(review):
+    
+    review = review.lower()
+    review = review.replace("<br /><br />"," ")
+    
+    # Tokenize
+    tokens = tokenizer.tokenize(review)
+    
+    new_tokens = [token for token in tokens if token not in en_stopwords]
+    
+    stemmed_tokens = [ps.stem(token) for token in new_tokens]
+    
+    cleaned_review = ' '.join(stemmed_tokens)
+    
+    return cleaned_review
+
+def getStemmedDocument(inputFile,outputFile):
+    
+    out = open(outputFile, 'w', encoding="utf8")
+    
+    with open(inputFile,encoding="utf8") as f:
+        
+        reviews = f.readlines()
+    
+    for review in reviews:
+        
+        cleaned_review = getStemmedReview(review)
+        
+        print((cleaned_review),file = out)
+    
+    out.close()
+
+
+
+'''Text Classification - Naive Bayes'''
+
+'''Step 1: Cleaning'''
+
+x_clean = [getCleanReview(i) for i in x]                     # List Comprehension in Python
+
+xt_clean = [getCleanReview(i) for i in x_test]               # Cleaning of test file as well
+
+'''Step 2: Vectorization'''
+
+cv = CountVectorizer()
+
+x_vec = cv.fit_transform(x_clean).toarray()
+
+xt_vec = cv.transform(xt_clean).toarray()                    # Transforming the xt_vec as per the features of training data
+
+'''Step 3: Multinomial Naive Bayes'''
+
+mnb = MultinomialNB()
+
+# Training
+mnb.fit(x_vec,y)
+
+# Predictions
+mnb.predict(xt_vec)
+
+'''Step 4: Multivariate Bernoulli Event Model Naive Bayes'''
+
+bnb = BernoulliNB(binarize=0.0)
+
+bnb.fit(x_vec,y)
+
+bnb.predict_proba(xt_vec)                                     # Probabilities on which our final prediction is based
+
+bnb.predict(xt_vec)
+
+bnb.score(x_vec,y)                                            # Final score of the prediction
